@@ -8,7 +8,7 @@ data class ParkingRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val latitude: Double,
-    val longtitude: Double,
+    val longitude: Double,
     val address: String,
     val startTime: Long,
     val expireTime: Long?,
