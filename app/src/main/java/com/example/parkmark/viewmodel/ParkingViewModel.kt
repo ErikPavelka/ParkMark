@@ -1,6 +1,7 @@
 package com.example.parkmark.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.parkmark.data.ParkingDao
 import com.example.parkmark.data.ParkingRecord
@@ -33,6 +34,13 @@ class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
             dao.deleteAllParkingRecords()
         }
     }
+}
 
-    fun
+class ParkingVieModelFactory(private val dao: ParkingDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ParkingViewModel::class.java)) {
+            return ParkingViewModel(dao) as T
+        }
+        throw IllegalArgumentException("neznama trieda ViewModelu")
+    }
 }
