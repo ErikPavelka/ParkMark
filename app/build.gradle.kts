@@ -55,4 +55,22 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+
+    // Jetpack Compose Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // ViewModel a Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // WorkManager pre notifikacie
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Google Play Services pre ziskavanie GPS polohy
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    // Room databaza
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
 }
