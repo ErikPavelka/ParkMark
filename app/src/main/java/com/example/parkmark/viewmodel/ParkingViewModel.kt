@@ -36,7 +36,7 @@ class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
     }
 }
 
-class ParkingVieModelFactory(private val dao: ParkingDao) : ViewModelProvider.Factory {
+class ParkingViewModelFactory(private val dao: ParkingDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ParkingViewModel::class.java)) {
             return ParkingViewModel(dao) as T

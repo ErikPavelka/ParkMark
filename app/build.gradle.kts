@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -70,7 +71,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.2.0")
 
     // Room databaza
-    val room_version = "2.6.1"
+    val room_version = "2.7.0"
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
+
+    ksp("androidx.room:room-compiler:$room_version")
+
+    // Google Maps pre Jetpack Compose
+    implementation("com.google.maps.android:maps-compose:4.3.3")
 }
