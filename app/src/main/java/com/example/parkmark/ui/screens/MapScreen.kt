@@ -2,6 +2,7 @@ package com.example.parkmark.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -113,6 +114,12 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
             properties = mapProperties,
             uiSettings = uiSettings
         )
+        androidx.compose.material3.Button(onClick = {navController.navigate("history")},
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 16.dp)) {
+            Text(text = "history")
+        }
 
         LargeFloatingActionButton(
             onClick = {
@@ -177,4 +184,5 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
 
         }
     }
+
 }
