@@ -1,6 +1,7 @@
 package com.example.parkmark.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
@@ -18,4 +19,9 @@ interface ParkingDao {
     //vymaze historiu recordov
     @Query("DELETE FROM parking_records")
     suspend fun deleteAllParkingRecords()
+
+    @Delete
+    suspend fun deleteParkingRecord(record : ParkingRecord)
+
+
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.parkmark.data.ParkingDao
 import com.example.parkmark.data.ParkingRecord
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -32,6 +33,12 @@ class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
     fun clearHistory() {
         viewModelScope.launch {
             dao.deleteAllParkingRecords()
+        }
+    }
+
+    fun deleteParking(parking : ParkingRecord) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.deleteParkingRecord(parking)
         }
     }
 }
