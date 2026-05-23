@@ -89,4 +89,6 @@ dependencies {
 
     // Google Maps pre Jetpack Compose
     implementation("com.google.maps.android:maps-compose:4.3.3")
+
+    implementation("androidx.compose.material:material-icons-extended")
 }
