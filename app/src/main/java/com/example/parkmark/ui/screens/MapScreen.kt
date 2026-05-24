@@ -1,6 +1,9 @@
 package com.example.parkmark.ui.screens
 
 import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -54,7 +57,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -71,6 +76,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.math.exp
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
@@ -117,11 +123,31 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
         position = CameraPosition.fromLatLngZoom(defaultLocation, 14f)
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted -> hasLocationPermission = isGranted }
+        onResult = {
+                isGranted ->
+            if(!isGranted) {
+                Toast.makeText(context, "bez povolenia nie je možné zobraziť časovač", Toast.LENGTH_LONG).show()
+            }
+        }
     )
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            hasLocationPermission = isGranted
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                val hasNotifPermission = ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (!hasNotifPermission) {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+    )
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
             try {
@@ -323,6 +349,13 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                                         note = note.ifEmpty { "zaparkované" },
                                         expireTime = expireTime
                                     )
+                                    if (expireTime != null) {
+                                        showParkingNotification(
+                                            context = context,
+                                            note = note.ifEmpty { "bez poznámky" },
+                                            expireTime = expireTime
+                                        )
+                                    }
                                     Toast.makeText(
                                         context,
                                         "Poloha uložená",
@@ -456,4 +489,35 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
         }
 
     )
+}
+fun showParkingNotification(context : Context, note : String, expireTime : Long) {
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val channelId = "parking_timer_channel"
+
+    if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            channelId,
+            "časovač parkovania",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "zostavajúci čas parkovacieho lístka"
+        }
+        notificationManager.createNotificationChannel(channel)
+    }
+    val builder = NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(android.R.drawable.ic_lock_lock)
+        .setContentTitle("aktívne parkovanie")
+        .setContentText("poznámka: $note")
+        .setOngoing(true)
+        .setUsesChronometer(true)
+        .setChronometerCountDown(true)
+        .setWhen(expireTime)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+
+    notificationManager.notify(100, builder.build())
+
+}
+fun cancelParkingNotification(context : Context) {
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(100)
 }

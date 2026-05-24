@@ -38,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.parkmark.viewmodel.ParkingViewModel
@@ -61,14 +62,8 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
             navigationIcon = {
                 IconButton(
                     onClick = {navController.popBackStack()
-                        val isVibrationEnabled = sharedPreferences.getBoolean("vibration_enabled", true)
-                        val isSoundEnabled = sharedPreferences.getBoolean("sound_enabled", true)
-                        if (isVibrationEnabled) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        }
-                        if (isSoundEnabled) {
-                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                        }
+                        if (sharedPreferences.getBoolean("vibration_enabled", true)) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (sharedPreferences.getBoolean("sound_enabled", true)) view.playSoundEffect(SoundEffectConstants.CLICK)
                     }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -124,21 +119,36 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = "suradnice: ${record.latitude}, ${record.longitude}")
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(text = "adresa: ${record.address}")
+                                if (record.note.isNotEmpty() && record.note != "zaparkované") {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "poznámka: ${record.note}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                if (record.expireTime != null) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    val expireDate = Date(record.expireTime)
+                                    val expireString = format.format(expireDate)
+                                    val isExpired = record.expireTime < System.currentTimeMillis()
+
+                                    Text(
+                                        text = if (isExpired) "Lístok vypršal: ${expireString}" else "Lístok platí do: ${expireString}",
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isExpired) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                                    )
+                                }
                             }
                             IconButton(
                                 onClick = {
                                     viewModel.deleteParking(record)
-                                    val isVibrationEnabled = sharedPreferences.getBoolean("vibration_enabled", true)
-                                    val isSoundEnabled = sharedPreferences.getBoolean("sound_enabled", true)
-                                    if (isVibrationEnabled) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    }
-                                    if (isSoundEnabled) {
-                                        view.playSoundEffect(SoundEffectConstants.CLICK)
-                                    }}
+                                    cancelParkingNotification(context)
+                                    if (sharedPreferences.getBoolean("vibration_enabled", true)) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (sharedPreferences.getBoolean("sound_enabled", true)) view.playSoundEffect(SoundEffectConstants.CLICK)
+                                }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,

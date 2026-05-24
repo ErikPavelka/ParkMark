@@ -172,6 +172,7 @@ fun SettingsScreen(navController: NavController, viewModel: ParkingViewModel) {
                 Button(
                     onClick = {
                         viewModel.clearHistory()
+                        cancelParkingNotification(context)
                         Toast.makeText(context, "vymazala sa história", Toast.LENGTH_LONG).show()
                         val isVibrationEnabled = sharedPreferences.getBoolean("vibration_enabled", true)
                         val isSoundEnabled = sharedPreferences.getBoolean("sound_enabled", true)
