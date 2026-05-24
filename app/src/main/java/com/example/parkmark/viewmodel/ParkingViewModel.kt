@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.exp
+import kotlin.time.Duration.Companion.days
 
 class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
 
@@ -39,6 +40,12 @@ class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
     fun deleteParking(parking : ParkingRecord) {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteParkingRecord(parking)
+        }
+    }
+    fun deleteOldHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val thresholdTime = System.currentTimeMillis() - 30.days.inWholeMilliseconds
+            dao.deleteRecordsOlder(thresholdTime)
         }
     }
 }

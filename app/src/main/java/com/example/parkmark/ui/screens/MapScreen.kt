@@ -95,6 +95,13 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var showSaveDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        val isAutoDeleteEnabled = sharedPreferences.getBoolean("auto_delete_30_days", false)
+        if (isAutoDeleteEnabled) {
+            viewModel.deleteOldHistory()
+        }
+    }
+
     var hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(

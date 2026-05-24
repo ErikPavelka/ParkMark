@@ -23,5 +23,8 @@ interface ParkingDao {
     @Delete
     suspend fun deleteParkingRecord(record : ParkingRecord)
 
+    @Query("DELETE FROM parking_records WHERE startTime < :threshold")
+    suspend fun deleteRecordsOlder(threshold : Long)
+
 
 }

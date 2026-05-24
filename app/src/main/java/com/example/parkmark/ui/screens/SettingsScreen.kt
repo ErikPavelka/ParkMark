@@ -59,7 +59,7 @@ fun SettingsScreen(navController: NavController, viewModel: ParkingViewModel) {
     var isVibrationEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("vibration_enabled", true)) }
     var isSoundEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("sound_enabled", true)) }
     var isAutoParkEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("autopark_enabled", false)) }
-
+    var isAutoDelete30Days by remember {mutableStateOf(sharedPreferences.getBoolean("auto_delete_30_days", false))}
 
 
     Scaffold(
@@ -206,15 +206,23 @@ fun SettingsScreen(navController: NavController, viewModel: ParkingViewModel) {
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Button(
-                    onClick = {/* TODO */},
+                    onClick = {
+                        val newValue = !isAutoDelete30Days
+                        isAutoDelete30Days = newValue
+                        sharedPreferences.edit().putBoolean("auto_delete_30_days", newValue).apply()
+                        if (newValue) {
+                            viewModel.deleteOldHistory()
+                            Toast.makeText(context, "Zapnutá. Stará história bola vymazaná.", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                     shape = RoundedCornerShape(4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        containerColor = if (isAutoDelete30Days) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (isAutoDelete30Days) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Text(
-                        text = "30 dni",
+                        text = if (isAutoDelete30Days) "30 dní ✓" else "30 dní",
                         fontWeight = FontWeight.Bold
                     )
                 }
