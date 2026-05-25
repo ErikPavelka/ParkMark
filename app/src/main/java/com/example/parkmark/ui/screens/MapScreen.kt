@@ -1,7 +1,6 @@
 package com.example.parkmark.ui.screens
 
 import android.Manifest
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -47,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,15 +55,16 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.example.parkmark.R
 import com.example.parkmark.viewmodel.ParkingViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
@@ -76,10 +77,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 import java.io.IOException
-import kotlin.math.exp
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-
+//pomahal som si s AI hlavne pri osetreni permissions pri launchedEffect, lifeCycle, a pri pouzivani google maps
 @androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
@@ -93,7 +93,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
         remember { context.getSharedPreferences("app_settings", Context.MODE_PRIVATE) }
 
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    var showSaveDialog by remember { mutableStateOf(false) }
+    var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val isAutoDeleteEnabled = sharedPreferences.getBoolean("auto_delete_30_days", false)
@@ -135,7 +135,8 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
         onResult = {
                 isGranted ->
             if(!isGranted) {
-                Toast.makeText(context, "bez povolenia nie je možné zobraziť časovač", Toast.LENGTH_LONG).show()
+                Toast.makeText(context,
+                    context.getString(R.string.nepovolene_notifikacie_text), Toast.LENGTH_LONG).show()
             }
         }
     )
@@ -180,7 +181,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ParkMark") },
+                title = { Text(stringResource(R.string.parkmark_title)) },
                 actions = {
                     IconButton(onClick = {
                         navController.navigate("history")
@@ -189,7 +190,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                     }) {
                         Icon(
                             imageVector = Icons.Default.History,
-                            contentDescription = "history"
+                            contentDescription = stringResource(R.string.historia)
                         )
                     }
                     IconButton(onClick = {
@@ -199,7 +200,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                     }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "settings"
+                            contentDescription = stringResource(R.string.nastavenia)
                         )
                     }
                 },
@@ -226,7 +227,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                     val parkingLocation = LatLng(parking.latitude, parking.longitude)
                     Marker(
                         state = rememberMarkerState(position = parkingLocation),
-                        title = "parked car",
+                        title = stringResource(R.string.zaparkovane_auto),
                         snippet = parking.address
                     )
                 }
@@ -249,7 +250,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                         } else {
                             Toast.makeText(
                                 context,
-                                "Poloha je zakázaná. Povoľte v nastaveniach.",
+                                context.getString(R.string.zakazana_poloha),
                                 Toast.LENGTH_LONG
                             ).show()
                             val intent =
@@ -268,7 +269,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.DirectionsCar,
-                        contentDescription = "save location",
+                        contentDescription = stringResource(R.string.uloz_poziciu),
                         modifier = Modifier.size(75.dp)
                     )
                 }
@@ -293,7 +294,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                                 } catch (e: IOException) {
                                     Toast.makeText(
                                         context,
-                                        "nie su nainstalovane google maps",
+                                        context.getString(R.string.nenainstalovane_mapy),
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
@@ -305,7 +306,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
-                                contentDescription = "navigovat k autu"
+                                contentDescription = stringResource(R.string.navigovat_k_autu)
                             )
                         }
                     }
@@ -327,7 +328,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                                     context,
                                     java.util.Locale.getDefault()
                                 )
-                                var address = "unknown address"
+                                var address = context.getString(R.string.neznama_adresa)
 
                                 try {
                                     val addresses = geocoder.getFromLocation(
@@ -337,7 +338,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                                     )
                                     if (!addresses.isNullOrEmpty()) {
                                         address =
-                                            addresses[0].getAddressLine(0) ?: "address not found"
+                                            addresses[0].getAddressLine(0) ?: context.getString(R.string.adresa_nebola_najdena)
                                     }
                                 } catch (e: IOException) {
 
@@ -353,19 +354,19 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                                         latitude = location.latitude,
                                         longitude = location.longitude,
                                         address = address,
-                                        note = note.ifEmpty { "zaparkované" },
+                                        note = note.ifEmpty { context.getString(R.string.zaparkovane) },
                                         expireTime = expireTime
                                     )
                                     if (expireTime != null) {
                                         showParkingNotification(
                                             context = context,
-                                            note = note.ifEmpty { "bez poznámky" },
+                                            note = note.ifEmpty { context.getString(R.string.bez_poznamky) },
                                             expireTime = expireTime
                                         )
                                     }
                                     Toast.makeText(
                                         context,
-                                        "Poloha uložená",
+                                        context.getString(R.string.poloha_ulozena),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -373,7 +374,7 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                         } else {
                             Toast.makeText(
                                 context,
-                                "GPS nefunguje.",
+                                context.getString(R.string.gps_nefunguje),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -381,12 +382,10 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
                 } catch (e: SecurityException) {
                     Toast.makeText(
                         context,
-                        "Chýba povolenie na polohu",
-                        android.widget.Toast.LENGTH_SHORT
+                        context.getString(R.string.chyba_povolenie_polohy),
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
-
-
             },
             haptic = haptic,
             view = view,
@@ -396,21 +395,21 @@ fun MapScreen(navController: NavController, viewModel: ParkingViewModel) {
 }
 
 
-
+//pomoc od AI hlavne pri vytvarani rotacnych cisel
 @Composable
 fun SaveParkingDialog(onDismissRequest : () -> Unit,
                       onSaveRequest :(note: String, addedHours: Int, addedMinutes : Int) -> Unit,
                       haptic: HapticFeedback,
                       view : View,
                       sharedPreferences: SharedPreferences) {
-    var noteText by remember { mutableStateOf("") }
-    var selectedHours by remember { mutableStateOf(0) }
-    var selectedMinutes by remember { mutableStateOf(0) }
+    var noteText by rememberSaveable { mutableStateOf("") }
+    var selectedHours by rememberSaveable { mutableStateOf(0) }
+    var selectedMinutes by rememberSaveable { mutableStateOf(0) }
 
     val isDarkMode = isSystemInDarkTheme()
     AlertDialog (
         onDismissRequest = onDismissRequest,
-        title = { Text("Uložiť parkovanie")},
+        title = { Text(stringResource(R.string.ulozit_parkovanie))},
         containerColor = MaterialTheme.colorScheme.surface,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
         textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -422,11 +421,11 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                 OutlinedTextField(
                     value = noteText,
                     onValueChange = {noteText = it},
-                    label = {Text("Poznámka napr. sektor A")},
+                    label = {Text(stringResource(R.string.poznamka_napr_sektor_a))},
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "Dĺžka parkovania",
+                    text = stringResource(R.string.dlzka_parkovania),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row(
@@ -438,7 +437,7 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                         factory = {context ->
                             NumberPicker(context).apply {
                                 minValue = 0
-                                maxValue = 24
+                                maxValue = 23
                                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                                     textColor = if (isDarkMode) android.graphics.Color.WHITE else android.graphics.Color.BLACK
                                 }
@@ -450,7 +449,7 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                             }
                         }
                     )
-                    Text("hod", modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(stringResource(R.string.hod), modifier = Modifier.padding(horizontal = 8.dp))
 
                     AndroidView(
                         factory = {context ->
@@ -467,7 +466,7 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                             }
                         }
                     )
-                    Text("min")
+                    Text(stringResource(R.string.min))
                 }
             }
         },
@@ -479,7 +478,7 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                     onSaveRequest(noteText, selectedHours, selectedMinutes)
                 }
             ) {
-                Text("Uložiť")
+                Text(stringResource(R.string.ulozit))
             }
         },
         dismissButton = {
@@ -491,12 +490,13 @@ fun SaveParkingDialog(onDismissRequest : () -> Unit,
                     onDismissRequest()
                 }
             ) {
-                Text("Zrušiť")
+                Text(stringResource(R.string.zrusit))
             }
         }
 
     )
 }
+//tuto cast kodu som robil s pomocou AI, kvoli pochopeni channel, casovaca, pendingIntent
 fun showParkingNotification(context : Context, note : String, expireTime : Long) {
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channelId = "parking_timer_channel"
@@ -504,22 +504,29 @@ fun showParkingNotification(context : Context, note : String, expireTime : Long)
     if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
         val channel = NotificationChannel(
             channelId,
-            "časovač parkovania",
+            context.getString(R.string.casovac_parkovania),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "zostavajúci čas parkovacieho lístka"
+            description = context.getString(R.string.zostavajuci_cas_parkovacieho_listka)
         }
         notificationManager.createNotificationChannel(channel)
     }
+    val intent = android.content.Intent(context, com.example.parkmark.MainActivity::class.java).apply {
+        flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    val pendingIntent: android.app.PendingIntent = android.app.PendingIntent.getActivity(
+        context, 0, intent, android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+    )
     val builder = NotificationCompat.Builder(context, channelId)
         .setSmallIcon(android.R.drawable.ic_lock_lock)
-        .setContentTitle("aktívne parkovanie")
-        .setContentText("poznámka: $note")
+        .setContentTitle(context.getString(R.string.aktivne_parkovanie))
+        .setContentText(context.getString(R.string.poznamka, note))
         .setOngoing(true)
         .setUsesChronometer(true)
         .setChronometerCountDown(true)
         .setWhen(expireTime)
         .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setContentIntent(pendingIntent)
 
     notificationManager.notify(100, builder.build())
 

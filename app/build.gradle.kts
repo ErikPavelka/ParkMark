@@ -91,4 +91,7 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:4.3.3")
 
     implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("androidx.glance:glance-appwidget:1.1.0")
+    implementation("androidx.glance:glance-material3:1.1.0")
 }

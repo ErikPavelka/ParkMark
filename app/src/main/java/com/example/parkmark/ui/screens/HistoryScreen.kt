@@ -38,9 +38,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.parkmark.R
 import com.example.parkmark.viewmodel.ParkingViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -58,7 +60,7 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {Text("Parking history") },
+                title = {Text(stringResource(R.string.historia_parkovania)) },
             navigationIcon = {
                 IconButton(
                     onClick = {navController.popBackStack()
@@ -67,7 +69,7 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                     }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "späť"
+                        contentDescription = stringResource(R.string.spat)
                     )
                 }
             },
@@ -86,7 +88,7 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("zatial nemas ulozene ziadne parkovania")
+                Text(stringResource(R.string.zatial_nemas_ulozene_ziadne_parkovania))
             }
         } else {
             LazyColumn(
@@ -115,16 +117,16 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                                 val dateString= format.format(date)
 
                                 Text(
-                                    text = "Dátum: $dateString",
+                                    text = stringResource(R.string.datum, dateString),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = "adresa: ${record.address}")
-                                if (record.note.isNotEmpty() && record.note != "zaparkované") {
+                                Text(text = stringResource(R.string.adresa, record.address))
+                                if (record.note.isNotEmpty() && record.note != stringResource(R.string.zaparkovane)) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "poznámka: ${record.note}",
+                                        text = stringResource(R.string.poznamka, record.note),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -136,7 +138,10 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                                     val isExpired = record.expireTime < System.currentTimeMillis()
 
                                     Text(
-                                        text = if (isExpired) "Lístok vypršal: ${expireString}" else "Lístok platí do: ${expireString}",
+                                        text = if (isExpired) stringResource(
+                                            R.string.listok_vyprsal,
+                                            expireString
+                                        ) else stringResource(R.string.listok_plati, expireString),
                                         fontWeight = FontWeight.Bold,
                                         color = if (isExpired) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                                     )
@@ -152,7 +157,7 @@ fun HistoryScreen(navController: NavController, viewModel : ParkingViewModel) {
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "vymazať",
+                                    contentDescription = stringResource(R.string.vymazat),
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             }

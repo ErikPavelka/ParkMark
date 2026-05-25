@@ -8,10 +8,8 @@ import com.example.parkmark.data.ParkingRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.exp
 import kotlin.time.Duration.Companion.days
 
 class ParkingViewModel(private val dao: ParkingDao) : ViewModel() {
